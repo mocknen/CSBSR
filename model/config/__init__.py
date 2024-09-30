@@ -1,1 +1,4 @@
-from .defaults import _C as cfg
+from .defaults import _C
+
+def get_cfg_defaults():
+  return _C.clone()

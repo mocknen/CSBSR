@@ -147,8 +147,6 @@ class Compose(object):
         self.transforms = transforms
 
     def __call__(self, img, mask=None):
-        i = 1
-
         for t in self.transforms:
             # chkprint(t)
             # print(t.__class__.__name__)
@@ -189,10 +187,10 @@ class Resize(object):
 
 class ToTensor(object):
     def __call__(self, image, mask=None):
-        if mask is None:
-            return torch.from_numpy(image.astype(np.float32)).permute(2, 0, 1), mask
-        else:
-            return torch.from_numpy(image.astype(np.float32)).permute(2, 0, 1), torch.from_numpy(mask.astype(np.float32)).permute(2, 0, 1)
+        return tuple([i if i is None else
+                      torch.from_numpy(i.astype(np.float32)).permute(2, 0, 1)
+                      for i in [image, mask]])
+
 
 class ToNumpy(object):
     def __call__(self, image, boxes=None, labels=None):
@@ -201,11 +199,9 @@ class ToNumpy(object):
 
 class ConvertFromInts(object):
     def __call__(self, image, mask):
-
-        if mask is not None:
-            return image.astype(np.float32), mask.astype(np.float32)
-        else:
-            return image.astype(np.float32), mask
+        return tuple([i if i is None else
+                      i.astype(np.float32)
+                      for i in [image, mask]])
 
 class ConvertToInts(object):
     def __call__(self, image, boxes=None, labels=None):

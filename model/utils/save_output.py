@@ -9,39 +9,28 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
+
 import torchvision.transforms as transforms
 import torch
 
 
-def save_img(dirname, sr_preds, fname):
-    # print(fpath)
+def save_img(out_dir, sr_preds, names):
     for batch_num in range(sr_preds.size()[0]):
         if sr_preds.shape[1] == 3:
-            sr_pred = transforms.ToPILImage(mode='RGB')(sr_preds[batch_num])
+            sr_img = transforms.ToPILImage(mode='RGB')(sr_preds[batch_num])
         elif sr_preds.shape[1] == 1:
-            sr_pred = transforms.ToPILImage(mode='L')(sr_preds[batch_num])
-
-        outdir = dirname / 'images'
-        os.makedirs(outdir, exist_ok=True)
-        fpath = outdir / f'{fname[batch_num]}'
-
-        sr_pred.save(fpath)
-        # print(f'saved at {fpath}')
+            sr_img = transforms.ToPILImage(mode='L')(sr_preds[batch_num])
+        dest_path = out_dir / names[batch_num]
+        os.makedirs(dest_path.parent, exist_ok=True)
+        sr_img.save(dest_path)
 
 
-def save_mask(args, segment_preds, fname, iou_th, add_path=''):
-    # print(segment_predss.shape)
-    # print(type(segment_preds))
-    # segment_preds = segment_preds.to("cpu")
+def save_mask(out_dir, segment_preds, names, iou_th):
     for batch_num in range(segment_preds.size()[0]):
-        th_name = f'th_{iou_th:.2f}'
-        segment_pred = transforms.ToPILImage()(segment_preds[batch_num])
-
-        outdir = args.output_dirname / f'masks{add_path}' / th_name
-        os.makedirs(outdir, exist_ok=True)
-        mpath = outdir / fname[batch_num]
-
-        segment_pred.save(mpath)
+        mask_img = transforms.ToPILImage()(segment_preds[batch_num])
+        dest_path = out_dir / f'th_{iou_th:.2f}' / names[batch_num]
+        os.makedirs(dest_path.parent, exist_ok=True)
+        mask_img.save(dest_path)
 
 
 def save_kernel(args, kernel_preds, fname, num_batch, add_path=''):

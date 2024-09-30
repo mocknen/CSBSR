@@ -1,12 +1,12 @@
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-## Toyota Technological Institute
-## Author: Yuki Kondo
-## Copyright (c) 2024
-## yuki.kondo.ab@gmail.com
-##
-## This source code is licensed under the Apache License license found in the
-## LICENSE file in the root directory of this source tree 
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Toyota Technological Institute
+# Author: Yuki Kondo
+# Copyright (c) 2024
+# yuki.kondo.ab@gmail.com
+#
+# This source code is licensed under the Apache License license found in the
+# LICENSE file in the root directory of this source tree
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
 from copy import copy
@@ -76,7 +76,7 @@ class MetaSRModel(nn.Module):
         else:
             sr_preds = self.sr_model(x)
             kernel_preds = torch.zeros(kernel_targets.shape).to("cuda")
-            
+
         return x, sr_targets, kernel_targets, sr_preds, kernel_preds
 
     def set_sr_model(self, cfg):
@@ -85,7 +85,7 @@ class MetaSRModel(nn.Module):
         else:
             num_channels = 3
 
-        if cfg.MODEL.SCALE_FACTOR == 1: 
+        if cfg.MODEL.SCALE_FACTOR == 1:
             sr_model = None
         elif cfg.MODEL.SR == 'bicubic':
             sr_model = 'bicubic'
@@ -137,7 +137,7 @@ class MetaSRModel(nn.Module):
             sr_images_norm  = norm(sr_images)
         else:
             return sr_images
-            
+
         return sr_images_norm
 
     def clip_sr(self, sr_preds):
@@ -168,7 +168,7 @@ class MetaSRLossCalc(nn.Module):
             sr_loss, kernel_preds = self.sr_loss_fn(sr_preds, sr_targets, x, kernel_preds, kernel_targets, segment_preds, segment_targets, iter)
         else:
             sr_loss = self.sr_loss_fn(sr_preds, sr_targets).mean(dim=(1,2,3))
-        
+
         return sr_loss, kernel_preds
 
     def set_sr_loss(self, cfg, sr_transforms):
@@ -202,14 +202,14 @@ class MetaSSModel(nn.Module):
             segment_preds, aux_segment_preds = self.segmentation_model(sr_preds)
             return segment_preds, aux_segment_preds
         else:
-            segment_preds = self.segmentation_model(sr_preds)     
+            segment_preds = self.segmentation_model(sr_preds)
             return segment_preds, None
 
     def set_ss_model(self, cfg):
         num_classes = cfg.MODEL.NUM_CLASSES
         if cfg.MODEL.DETECTOR_TYPE == 'u-net16':
             self.seg_model_name = 'u-net16'
-            segmentation_model = UNet16(num_classes=num_classes, pretrained=True, up_sampling_method=cfg.MODEL.UP_SAMPLE_METHOD)        
+            segmentation_model = UNet16(num_classes=num_classes, pretrained=True, up_sampling_method=cfg.MODEL.UP_SAMPLE_METHOD)
         elif cfg.MODEL.DETECTOR_TYPE == 'PSPNet':
             # Main loss and auxiliary loss conform to segmentation loss function
             self.seg_model_name = 'PSPNet'
@@ -294,13 +294,13 @@ class MetaSSLossCalc(nn.Module):
         elif cfg.SOLVER.SEG_LOSS_FUNC == "BoundaryCombo": # old: Boundary
             pos_weight = cfg.SOLVER.BCELOSS_WEIGHT
             loss_weight = cfg.SOLVER.WB_AND_D_WEIGHT
-            per_epoch = num_train_ds // cfg.SOLVER.BATCH_SIZE + 1   
-            ss_loss_fn = BoundaryComboLoss(per_epoch, pos_weight=pos_weight, loss_weight=loss_weight, 
+            per_epoch = num_train_ds // cfg.SOLVER.BATCH_SIZE + 1
+            ss_loss_fn = BoundaryComboLoss(per_epoch, pos_weight=pos_weight, loss_weight=loss_weight,
                                             decrease_ratio=cfg.SOLVER.BOUNDARY_DEC_RATIO,
                                             resume_iter = seg_rsm_iter, out_map=out_map).to('cuda')
         elif cfg.SOLVER.SEG_LOSS_FUNC == "Boundary_GDice":
             per_epoch = num_train_ds // cfg.SOLVER.BATCH_SIZE + 1
-            ss_loss_fn = Boundary_GDiceLoss(per_epoch, resume_iter=seg_rsm_iter, 
+            ss_loss_fn = Boundary_GDiceLoss(per_epoch, resume_iter=seg_rsm_iter,
                                             decrease_ratio=cfg.SOLVER.BOUNDARY_DEC_RATIO).to('cuda')
         elif cfg.SOLVER.SEG_LOSS_FUNC == "GeneralizedBoundaryCombo":
             pos_weight = cfg.SOLVER.BCELOSS_WEIGHT
@@ -329,7 +329,7 @@ class JointModelWithLoss(MetaSRLossCalc, MetaSSLossCalc, MetaSRModel, MetaSSMode
         self.w_sfo_sr = SegmentFailerOrientedExpWeight(cfg, cfg.SOLVER.SEG_FAIL_ORIENTED_WEIGHT4SR_AMP, cfg.SOLVER.SEG_FAIL_ORIENTED_WEIGHT4SR_BIAS)
         self.w_sfo_ss = SegmentFailerOrientedExpWeight(cfg, cfg.SOLVER.SEG_FAIL_ORIENTED_WEIGHT4SS_AMP, cfg.SOLVER.SEG_FAIL_ORIENTED_WEIGHT4SS_BIAS)
         self.w_ssloss_sr = cfg.SOLVER.INTERM_SSLOSSWEGHT4SR
-        self.blur_ksize = cfg.BLUR.KERNEL_SIZE  # Estimate kernel_dim by networks. If you use upsampling, KERNEL_SIZE_OUTPUT is different from KERNEL_SIZE and the 
+        self.blur_ksize = cfg.BLUR.KERNEL_SIZE  # Estimate kernel_dim by networks. If you use upsampling, KERNEL_SIZE_OUTPUT is different from KERNEL_SIZE and the
                                                 # required kernel size is KERNEL_SIZE_OUTPUT.
         self.gap = nn.AdaptiveAvgPool2d(1)
         if cfg.MODEL.DETECTOR_TYPE == 'DSRL' and  cfg.MODEL.SR == 'DSRL':
@@ -341,7 +341,7 @@ class JointModelWithLoss(MetaSRLossCalc, MetaSSLossCalc, MetaSRModel, MetaSSMode
             else:
                 self.parallel_model = DeepLab(num_classes=1)
                 fname = 'DSRL'
-            
+
             if not cfg.MODEL.SR_SCRATCH:
                 pretrained_model_path = os.path.join('weights', f'{fname}.pth')
                 m_key, u_key = self.parallel_model.load_state_dict(fix_model_state_dict(torch.load(pretrained_model_path), addition_word='parallel_model.'), strict=False)
@@ -365,7 +365,7 @@ class JointModelWithLoss(MetaSRLossCalc, MetaSSLossCalc, MetaSRModel, MetaSSMode
                 for param in self.segmentation_model.blur_skip.parameters():
                     param.requires_grad = True
 
-            print('+++++++ Fixed all parameters except BlurSkip. +++++++') 
+            print('+++++++ Fixed all parameters except BlurSkip. +++++++')
 
     def forward(self, iter, x, sr_targets=None, segment_targets=None, kernel_targets=None):
         if self.sr_model == "DSRL":
@@ -421,7 +421,7 @@ class JointModelWithLoss(MetaSRLossCalc, MetaSSLossCalc, MetaSRModel, MetaSSMode
 
     def multiple_weight(self, sr_loss, segment_loss, segment_preds, segment_targets, iter):
         if self.oriented_w_iter <= iter:
-            
+
             if self.sr_loss_fn.__class__.__name__ != "KBPNLoss":    # In KBPN loss, the weight calculation is performed internally.
                 if self.w_co_sr.amp != 0:
                     # print(self.w_co_sr(segment_targets).shape, sr_loss.shape)
@@ -444,7 +444,7 @@ class JointModel(MetaSRModel, MetaSSModel):
         super().__init__(cfg, mro_name)
         self.GAP = nn.AdaptiveAvgPool2d(1)
         self.ksize = cfg.BLUR.KERNEL_SIZE_OUTPUT
-        self.blur_ksize = cfg.BLUR.KERNEL_SIZE  # Estimate kernel_dim by networks. If you use upsampling, KERNEL_SIZE_OUTPUT is different from KERNEL_SIZE and the 
+        self.blur_ksize = cfg.BLUR.KERNEL_SIZE  # Estimate kernel_dim by networks. If you use upsampling, KERNEL_SIZE_OUTPUT is different from KERNEL_SIZE and the
                                                 # required kernel size is KERNEL_SIZE_OUTPUT.
         self.scale_factor = cfg.MODEL.SCALE_FACTOR
         if cfg.MODEL.DETECTOR_TYPE == 'DSRL' and  cfg.MODEL.SR == 'DSRL':
@@ -456,13 +456,13 @@ class JointModel(MetaSRModel, MetaSSModel):
             else:
                 self.parallel_model = DeepLab(num_classes=1)
                 fname = 'DSRL'
-            
+
             if not cfg.MODEL.SR_SCRATCH:
                 pretrained_model_path = os.path.join('weights', f'{fname}.pth')
                 m_key, u_key = self.parallel_model.load_state_dict(fix_model_state_dict(torch.load(pretrained_model_path), addition_word='parallel_model.'), strict=False)
                 assert len(u_key) == 0, (f'unexpected_keys are exist.\n {u_key}')
                 print('DSRL pretrained model was loaded from {}'.format(pretrained_model_path))
-                
+
     def forward(self, x, damy_kernel, sr_targets=None):
         iter = -1
         if self.sr_model == "DSRL":
@@ -476,7 +476,7 @@ class JointModel(MetaSRModel, MetaSSModel):
 
         else:
             x, _, _, sr_preds, kernel_preds = self.forward_sr(iter, x, sr_targets=sr_targets, kernel_targets=damy_kernel)
-            
+
             sr_preds = self.clip_sr(sr_preds)
             if self.seg_model_name == 'PSPNet_BlurSkip':
                 segment_preds, aux_segment_preds = self.forward_ss_with_blurkernel(self.norm_sr(sr_preds), kernel_preds)
@@ -528,7 +528,7 @@ class JointInvModel(MetaSRModel, MetaSSModel):
         lr_segment_preds = self.forward_ss(x)
         _, _, _, segment_preds, kernel_preds = self.forward_sr(iter, lr_segment_preds)
         segment_preds = self.clip_sr(segment_preds)
-            
+
         return lr_segment_preds, segment_preds, kernel_preds
 
 
@@ -558,6 +558,5 @@ class SRModel(MetaSRModel):
 
     def forward(self, iter, x, sr_targets=None, kernel_targets=None):
         x, sr_targets, kernel_targets, sr_preds, kernel_preds = self.forward_sr(iter, x, sr_targets, kernel_targets)
-        
-        return sr_preds, kernel_preds
 
+        return sr_preds, kernel_preds

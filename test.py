@@ -29,21 +29,15 @@ from torch.multiprocessing import set_start_method
 
 def test(args, cfg):
     device = torch.device(cfg.DEVICE)
-    # model = Model(cfg).to(device)
+
     if cfg.MODEL.SR_SEG_INV:
         model = JointInvModel(cfg).to(device)
-        # print(f'------------Model Architecture-------------\n\n<Network SS>\n{model.segmentation_model}\n\n<Network SR>\n{model.sr_model}')
     else:
         model = JointModel(cfg).to(device)
-        if model.sr_model == 'DSRL':
-            # print(f'------------Model Architecture-------------\n\n<Network parallel>\n{model.parallel_model}')
-            pass
-        else:
-            # print(f'------------Model Architecture-------------\n\n<Network SR>\n{model.sr_model}\n\n<Network SS>\n{model.segmentation_model}')
-            pass
 
     model.load_state_dict(fix_model_state_dict(torch.load(
         args.trained_model, map_location=lambda storage, loc: storage)))
+
     if 'indOptim' in cfg.OUTPUT_DIR:
         if cfg.MODEL.SR == 'KBPN':
             path = 'weights/KBPN_30000iter.pth'
@@ -53,6 +47,7 @@ def test(args, cfg):
         m_key, u_key = model.load_state_dict(
             fix_model_state_dict(torch.load(path)), strict=False)
         assert len(u_key) == 0, (f'unexpected_keys are exist.\n {u_key}')
+
     model.eval()
 
     print('Loading Datasets...')

@@ -1,15 +1,14 @@
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-## Toyota Technological Institute
-## Author: Yuki Kondo
-## Copyright (c) 2024
-## yuki.kondo.ab@gmail.com
-##
-## This source code is licensed under the Apache License license found in the
-## LICENSE file in the root directory of this source tree 
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Toyota Technological Institute
+# Author: Yuki Kondo
+# Copyright (c) 2024
+# yuki.kondo.ab@gmail.com
+#
+# This source code is licensed under the Apache License license found in the
+# LICENSE file in the root directory of this source tree
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from yacs.config import CfgNode as CN
-# from ..data.transforms.transforms import *
 
 _C = CN()
 _C.DEVICE = 'cuda'
@@ -21,7 +20,7 @@ _C.MODEL.SR = 'DBPN'
 _C.MODEL.UP_SAMPLE_METHOD = "deconv" # "pixel_shuffle"
 _C.MODEL.DETECTOR_DBPN_NUM_STAGES = 4
 _C.MODEL.OPTIMIZER = 'Adam' # SGD
-_C.MODEL.NUM_CLASSES = 1  
+_C.MODEL.NUM_CLASSES = 1
 _C.MODEL.NUM_STAGES = 4
 _C.MODEL.SR_SEG_INV = False
 _C.MODEL.JOINT_LEARNING = True
@@ -109,13 +108,9 @@ _C.DATASET.DATA_AUGMENTATION = [["ConvertFromInts", None],
                                 ]
 _C.DATASET.TRAIN_IMAGE_DIR = 'datasets/crack_segmentation_dataset/train/images'
 _C.DATASET.TRAIN_MASK_DIR = 'datasets/crack_segmentation_dataset/train/masks'
-_C.DATASET.TEST_IMAGE_DIR = 'datasets/crack_segmentation_dataset/test_blured/gt/images'
-_C.DATASET.TEST_MASK_DIR = 'datasets/crack_segmentation_dataset/test_blured/gt/masks'
+_C.DATASET.TEST_IMAGE_DIR = 'datasets/crack_segmentation_dataset/test/images'
+_C.DATASET.TEST_MASK_DIR = 'datasets/crack_segmentation_dataset/test/masks'
 _C.DATASET.TEST_BLURED_DIR = 'datasets/crack_segmentation_dataset/test_blured/'
 _C.DATASET.TEST_BLURED_NAME = '02_40'
 
-
-_C.OUTPUT_DIR = 'output/CSSR_SR-SS'
-_C.SEED = 1121
-
-_C.BASE_NET = 'weights/vgg16_reducedfc.pth'
+_C.OUTPUT_DIR = '.'

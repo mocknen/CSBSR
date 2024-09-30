@@ -1,14 +1,15 @@
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-## Toyota Technological Institute
-## Author: Yuki Kondo
-## Copyright (c) 2024
-## yuki.kondo.ab@gmail.com
-##
-## This source code is licensed under the Apache License license found in the
-## LICENSE file in the root directory of this source tree 
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Toyota Technological Institute
+# Author: Yuki Kondo
+# Copyright (c) 2024
+# yuki.kondo.ab@gmail.com
+#
+# This source code is licensed under the Apache License license found in the
+# LICENSE file in the root directory of this source tree
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .transforms import *
+from .transforms import Compose, ConvertFromInts, ToTensor
+
 
 class TrainTransforms:
     def __init__(self, cfg):
@@ -22,7 +23,7 @@ class TrainTransforms:
                 comp.append(eval(func)(cfg.INPUT.IMAGE_SIZE, **args[0]))
             elif func == "RandomCrop":
                 comp.append(eval(func)(cfg.INPUT.IMAGE_SIZE))
-            elif args == None or args == "None":
+            elif args is None or args == "None":
                 comp.append(eval(func)())
             else:
                 eval(func)(args)
@@ -39,22 +40,17 @@ class TrainTransforms:
         # ])
 
     def __call__(self, image, mask):
-        image, mask = self.augment(image, mask)
-        if mask is not None:
-            return image/255, mask/255
-        
-        return image/255, None
+        return tuple([i if i is None else i / 255
+                      for i in self.augment(image, mask)])
+
 
 class TestTransforms:
-    def __init__(self, cfg):
+    def __init__(self, _):
         self.augment = Compose([
             ConvertFromInts(),
             ToTensor(),
         ])
 
     def __call__(self, image, mask):
-        image, mask = self.augment(image, mask)
-        if mask is not None:
-            return image/255, mask/255
-        
-        return image/255, None
+        return tuple([i if i is None else i / 255
+                      for i in self.augment(image, mask)])
