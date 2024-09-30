@@ -116,7 +116,7 @@ def main():
     parser.add_argument('--origin_img_size', type=bool, default=True)
     parser.add_argument('--tti_crack_dataset', type=bool, default=False)
     parser.add_argument('--trained_model', type=Path, default=None)
-    parser.add_argument('--wandb_flag', type=bool, default=True)
+    parser.add_argument('--wandb_flag', type=bool, default=False)
     parser.add_argument('--wandb_prj_name', type=str, default='CSBSR_test')
     args = parser.parse_args()
 
