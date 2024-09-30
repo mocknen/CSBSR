@@ -21,12 +21,14 @@ from model.data.blur.blur import set_blur, conv_kernel2d
 
 
 class CrackDataSet(Dataset):
-    def __init__(self, cfg, image_dir, seg_dir, transforms=None,
-                 sr_transforms=None):
-        print('image_dir', image_dir)
-        self.image_dir = image_dir
-        self.seg_dir = seg_dir
-        self.fnames = [path.name for path in Path(image_dir).glob('*.jpg')]
+    def __init__(self, cfg, image_dir, seg_dir,
+                 transforms=None, sr_transforms=None):
+        print(f'{image_dir=}')
+        print(f'{seg_dir=}')
+        self.image_dir = Path(image_dir)
+        self.seg_dir = Path(seg_dir)
+        self.fnames = [p.name for p in self.image_dir.glob('*.jpg')]
+        self.fnames += [p.name for p in self.image_dir.glob('*.png')]
         self.img_transforms = transforms
         self.sr_transforms = sr_transforms
         self.blur_flag = cfg.BLUR.FLAG
@@ -36,9 +38,9 @@ class CrackDataSet(Dataset):
     def __getitem__(self, i):
 
         fname = self.fnames[i]
-        fpath = os.path.join(self.image_dir, fname)
+        fpath = self.image_dir / fname
         img = np.array(Image.open(fpath))  # Image.open(fpath)
-        spath = os.path.join(self.seg_dir, fname)
+        spath = self.seg_dir / fname
 
         seg_target = np.array(Image.open(spath))[:, :, np.newaxis]  # HxWxC
         img, seg_target = self.img_transforms(img, seg_target)
@@ -67,14 +69,18 @@ class CrackDataSet(Dataset):
 
 
 class CrackDataSetTest(Dataset):
-    def __init__(self, cfg, image_dir, seg_dir, blur_dir, blur_name,
-                 batch_size, transforms=None, sr_transforms=None):
+    def __init__(self, cfg, image_dir, seg_dir,
+                 blur_dir, blur_name, batch_size,
+                 transforms=None, sr_transforms=None):
         from model.data.samplers.patch_sampler import SplitPatch
-        self.gt_image_dir = image_dir
-        self.gt_seg_dir = seg_dir
-        self.gt_blur_dir = os.path.join(blur_dir, blur_name, 'kernels')
-        self.input_image_dir = os.path.join(blur_dir, blur_name, 'lr_images')
-        self.fnames = [path.name for path in Path(image_dir).glob('*.jpg')]
+        print(f'{image_dir=}')
+        print(f'{seg_dir=}')
+        self.gt_image_dir = Path(image_dir)
+        self.gt_seg_dir = Path(seg_dir)
+        self.gt_blur_dir = Path(blur_dir) / blur_name / 'kernels'
+        self.input_image_dir = Path(blur_dir) / blur_name / 'lr_images'
+        self.fnames = [p.name for p in self.gt_image_dir.glob('*.jpg')]
+        self.fnames += [p.name for p in self.gt_image_dir.glob('*.png')]
         self.img_transforms = transforms
         self.sr_transforms = sr_transforms
         self.scale_factor = cfg.MODEL.SCALE_FACTOR
@@ -86,21 +92,21 @@ class CrackDataSetTest(Dataset):
 
     def __getitem__(self, i):
         fname = self.fnames[i]
-        fpath = os.path.join(self.gt_image_dir, fname)
+        fpath = self.gt_image_dir / fname
         sr_target = np.array(Image.open(fpath))  # Image.open(fpath)
-        spath = os.path.join(self.gt_seg_dir, fname)
+        spath = self.gt_seg_dir / fname
         seg_target = np.array(Image.open(spath))[:, :, np.newaxis]  # HxWxC
         sr_target, seg_target = self.img_transforms(sr_target, seg_target)
 
         fname = fname.replace('jpg', 'png')
-        kpath = os.path.join(self.gt_blur_dir, fname)
+        kpath = self.gt_blur_dir / fname
         blur_kernel = np.array(Image.open(kpath))[:, :, np.newaxis]
         blur_kernel, _ = self.img_transforms(blur_kernel, None)
         blur_kernel = blur_kernel / torch.sum(blur_kernel)
         # print(blur_kernel.shape)
 
         if self.scale_factor != 1:
-            fpath = os.path.join(self.input_image_dir, fname)
+            fpath = self.input_image_dir / fname
             img = np.array(Image.open(fpath))
             img, _ = self.img_transforms(img, None)
         else:
