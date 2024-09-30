@@ -98,8 +98,8 @@ def test(args, cfg):
 def main():
     parser = argparse.ArgumentParser(
         description='Crack Segmentation with Blind Super Resolution(CSBSR)')
-    parser.add_argument('test_dir', type=str, default=None)
-    parser.add_argument('iter_or_weight_name', type=str, default=None)
+    parser.add_argument('test_dir', type=str)
+    parser.add_argument('iter_or_weight_name', type=str)
 
     parser.add_argument('--output_dirname', type=str, default=None)
     parser.add_argument('--config_file', type=str, default=None, metavar='FILE')
