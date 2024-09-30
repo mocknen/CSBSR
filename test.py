@@ -9,6 +9,7 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import argparse
+from pathlib import Path
 import re
 
 import torch
@@ -98,11 +99,11 @@ def test(args, cfg):
 def main():
     parser = argparse.ArgumentParser(
         description='Crack Segmentation with Blind Super Resolution(CSBSR)')
-    parser.add_argument('test_dir', type=str)
+    parser.add_argument('test_dir', type=Path)
     parser.add_argument('iter_or_weight_name', type=str)
 
-    parser.add_argument('--output_dirname', type=str, default=None)
-    parser.add_argument('--config_file', type=str, default=None, metavar='FILE')
+    parser.add_argument('--output_dirname', type=Path, default=None)
+    parser.add_argument('--config_file', type=Path, default=None, metavar='FILE')
     parser.add_argument('--test_blured_name', type=str, default=None)
     parser.add_argument('--num_workers', type=int, default=8)
     parser.add_argument('--batch_size', type=int, default=12)
@@ -114,7 +115,7 @@ def main():
                         help="If you do not want the output images to be saved, you should turn off this flag.")
     parser.add_argument('--origin_img_size', type=bool, default=True)
     parser.add_argument('--tti_crack_dataset', type=bool, default=False)
-    parser.add_argument('--trained_model', type=str, default=None)
+    parser.add_argument('--trained_model', type=Path, default=None)
     parser.add_argument('--wandb_flag', type=bool, default=True)
     parser.add_argument('--wandb_prj_name', type=str, default="CSBSR_test")
     args = parser.parse_args()
@@ -128,27 +129,25 @@ def main():
         _out_dir = f"iter_{args.iter_or_weight_name}"
         model_fname = f"iteration_{args.iter_or_weight_name}"
 
-    check_args = [
-        ('config_file', f'{args.test_dir}/config.yaml'),
-        ('output_dirname', f'{args.test_dir}/eval_AIU/{_out_dir}'),
-        ('trained_model', f'{args.test_dir}/model/{model_fname}.pth'),
-    ]
+    if not args.config_file:
+        args.config_file = args.test_dir / 'config.yaml'
+
+    if not args.output_dirname:
+        args.output_dirname = args.test_dir / 'eval_AIU' / _out_dir
+
+    if not args.trained_model:
+        args.trained_model = args.test_dir / 'model' / f'{model_fname}.pth'
 
     if args.origin_img_size:
         img_size = cfg.INPUT.IMAGE_SIZE  # keep default
-
-    for check_arg in check_args:
-        arg_name = f'args.{check_arg[0]}'
-        if not exec(arg_name):
-            exec(f'{arg_name} = "{check_arg[1]}"')
 
     cuda = torch.cuda.is_available()
     if cuda:
         torch.backends.cudnn.benchmark = True
 
-    if len(args.config_file) > 0:
-        print('Configration file is loaded from {}'.format(args.config_file))
-        cfg.merge_from_file(args.config_file)
+
+    print('Configration file is loaded from {}'.format(args.config_file))
+    cfg.merge_from_file(args.config_file)
 
     if args.test_blured_name:
         cfg.DATASET.TEST_BLURED_NAME = args.test_blured_name
@@ -162,7 +161,7 @@ def main():
     if 'RetinalSeg' in cfg.DATASET.TEST_IMAGE_DIR and args.origin_img_size:
         img_size = [560, 560]
 
-    cfg.OUTPUT_DIR = args.output_dirname
+    cfg.OUTPUT_DIR = str(args.output_dirname)
     if args.origin_img_size:
         print(f'Size of input image is {img_size}.')
         cfg.INPUT.IMAGE_SIZE = img_size
