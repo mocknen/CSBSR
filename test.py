@@ -111,9 +111,9 @@ def main():
         _out_dir = f"iter_{args.iter_or_weight_name}"
         model_fname = f"iteration_{args.iter_or_weight_name}"
 
-    check_args = [('config_file', f'{args.test_dir}config.yaml'),
-     ('output_dirname', f'{args.test_dir}eval_AIU/{_out_dir}'),
-     ('trained_model', f'{args.test_dir}model/{model_fname}.pth'),
+    check_args = [('config_file', f'{args.test_dir}/config.yaml'),
+     ('output_dirname', f'{args.test_dir}/eval_AIU/{_out_dir}'),
+     ('trained_model', f'{args.test_dir}/model/{model_fname}.pth'),
     ]
 
     if args.origin_img_size:
