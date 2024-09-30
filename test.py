@@ -5,7 +5,7 @@
 ## yuki.kondo.ab@gmail.com
 ##
 ## This source code is licensed under the Apache License license found in the
-## LICENSE file in the root directory of this source tree 
+## LICENSE file in the root directory of this source tree
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import argparse
@@ -59,11 +59,11 @@ def test(args, cfg):
     if args.tti_crack_dataset:
         test_dataset = TTICrackDataSetTest(cfg, cfg.DATASET.TEST_IMAGE_DIR, args.batch_size, transforms=test_transforms, )
     elif 'RetinalSeg' in cfg.DATASET.TEST_IMAGE_DIR:
-        test_dataset = RetinalDataSetTest(cfg, cfg.DATASET.TEST_IMAGE_DIR, cfg.DATASET.TEST_MASK_DIR, 
+        test_dataset = RetinalDataSetTest(cfg, cfg.DATASET.TEST_IMAGE_DIR, cfg.DATASET.TEST_MASK_DIR,
                                         cfg.DATASET.TEST_BLURED_DIR, cfg.DATASET.TEST_BLURED_NAME, args.batch_size,
                                         transforms=test_transforms, sr_transforms=sr_transforms)
     else:
-        test_dataset = CrackDataSetTest(cfg, cfg.DATASET.TEST_IMAGE_DIR, cfg.DATASET.TEST_MASK_DIR, 
+        test_dataset = CrackDataSetTest(cfg, cfg.DATASET.TEST_IMAGE_DIR, cfg.DATASET.TEST_MASK_DIR,
                                         cfg.DATASET.TEST_BLURED_DIR, cfg.DATASET.TEST_BLURED_NAME, args.batch_size,
                                         transforms=test_transforms, sr_transforms=sr_transforms)
     sampler = SequentialSampler(test_dataset)
@@ -74,7 +74,7 @@ def test(args, cfg):
         device_ids = list(range(args.num_gpus))
         print("device_ids:",device_ids)
         model = torch.nn.DataParallel(model, device_ids=device_ids)
-    with torch.no_grad(): 
+    with torch.no_grad():
         if args.tti_crack_dataset:
             inference_tti_building(args, cfg, model, test_loader)
         else:
@@ -87,7 +87,7 @@ def main():
 
     parser.add_argument('--output_dirname', type=str, default=None)
     parser.add_argument('--config_file', type=str, default=None, metavar='FILE')
-    parser.add_argument('--test_blured_name', type=str, default=None)    
+    parser.add_argument('--test_blured_name', type=str, default=None)
     parser.add_argument('--num_workers', type=int, default=8)
     parser.add_argument('--batch_size', type=int, default=12)
     parser.add_argument('--num_gpus', type=int, default=1)
@@ -109,11 +109,11 @@ def main():
     else:
         # iteration number
         _out_dir = f"iter_{args.iter_or_weight_name}"
-        model_fname = f"iteration_{args.iter_or_weight_name}"    
+        model_fname = f"iteration_{args.iter_or_weight_name}"
 
-    check_args = [('config_file', f'{args.test_dir}config.yaml'), 
+    check_args = [('config_file', f'{args.test_dir}config.yaml'),
      ('output_dirname', f'{args.test_dir}eval_AIU/{_out_dir}'),
-     ('trained_model', f'{args.test_dir}model/{model_fname}.pth'), 
+     ('trained_model', f'{args.test_dir}model/{model_fname}.pth'),
     ]
 
     if args.origin_img_size:
@@ -132,7 +132,7 @@ def main():
     if len(args.config_file) > 0:
         print('Configration file is loaded from {}'.format(args.config_file))
         cfg.merge_from_file(args.config_file)
-    
+
     if args.test_blured_name != None:
         cfg.DATASET.TEST_BLURED_NAME = args.test_blured_name
         args.output_dirname = f'{args.test_dir}/eval_AIU/compe_blur/{_out_dir}_{args.test_blured_name}'
