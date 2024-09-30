@@ -1,12 +1,12 @@
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-## Toyota Technological Institute
-## Author: Yuki Kondo
-## Copyright (c) 2024
-## yuki.kondo.ab@gmail.com
-##
-## This source code is licensed under the Apache License license found in the
-## LICENSE file in the root directory of this source tree
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Toyota Technological Institute
+# Author: Yuki Kondo
+# Copyright (c) 2024
+# yuki.kondo.ab@gmail.com
+#
+# This source code is licensed under the Apache License license found in the
+# LICENSE file in the root directory of this source tree
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
 import torchvision.transforms as transforms
@@ -28,27 +28,29 @@ def save_img(dirname, sr_preds, fname):
         sr_pred.save(fpath)
         # print(f'saved at {fpath}')
 
-def save_mask(args, segment_preds, fname, iou_th, add_path=""):
+
+def save_mask(args, segment_preds, fname, iou_th, add_path=''):
     # print(segment_predss.shape)
     # print(type(segment_preds))
     # segment_preds = segment_preds.to("cpu")
     for batch_num in range(segment_preds.size()[0]):
-        th_name = f"th_{iou_th:.2f}"
+        th_name = f'th_{iou_th:.2f}'
         segment_pred = transforms.ToPILImage()(segment_preds[batch_num])
 
-        outdir = args.output_dirname /  f'masks{add_path}' / th_name
+        outdir = args.output_dirname / f'masks{add_path}' / th_name
         os.makedirs(outdir, exist_ok=True)
         mpath = outdir / fname[batch_num]
 
         segment_pred.save(mpath)
 
-def save_kernel(args, kernel_preds, fname, num_batch, add_path=""):
+
+def save_kernel(args, kernel_preds, fname, num_batch, add_path=''):
     # print(segment_predss.shape)
     # print(type(segment_preds))
     # segment_preds = segment_preds.to("cpu")
     num_patch = kernel_preds.shape[0] // num_batch
     for i in range(num_batch):
-        fname_ =  f"{fname[i]}".replace(".png", '')
+        fname_ = f'{fname[i]}'.replace('.png', '')
         for j in range(num_patch):
             idx = i * num_patch + j
 

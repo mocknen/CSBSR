@@ -35,7 +35,7 @@ def test(args, cfg):
         # print(f'------------Model Architecture-------------\n\n<Network SS>\n{model.segmentation_model}\n\n<Network SR>\n{model.sr_model}')
     else:
         model = JointModel(cfg).to(device)
-        if model.sr_model == "DSRL":
+        if model.sr_model == 'DSRL':
             # print(f'------------Model Architecture-------------\n\n<Network parallel>\n{model.parallel_model}')
             pass
         else:
@@ -87,7 +87,7 @@ def test(args, cfg):
 
     if args.num_gpus > 1:
         device_ids = list(range(args.num_gpus))
-        print("device_ids:", device_ids)
+        print('device_ids:', device_ids)
         model = torch.nn.DataParallel(model, device_ids=device_ids)
     with torch.no_grad():
         if args.tti_crack_dataset:
@@ -109,25 +109,25 @@ def main():
     parser.add_argument('--batch_size', type=int, default=12)
     parser.add_argument('--num_gpus', type=int, default=1)
     parser.add_argument('--test_aiu', type=bool, default=True)
-    parser.add_argument('--test_surface_distance', action="store_true")
-    parser.add_argument('--test_classification_metrics', action="store_true")
-    parser.add_argument('--sf_save_image', action="store_false",
-                        help="If you do not want the output images to be saved, you should turn off this flag.")
+    parser.add_argument('--test_surface_distance', action='store_true')
+    parser.add_argument('--test_classification_metrics', action='store_true')
+    parser.add_argument('--sf_save_image', action='store_false',
+                        help='If you do not want the output images to be saved, you should turn off this flag.')
     parser.add_argument('--origin_img_size', type=bool, default=True)
     parser.add_argument('--tti_crack_dataset', type=bool, default=False)
     parser.add_argument('--trained_model', type=Path, default=None)
     parser.add_argument('--wandb_flag', type=bool, default=True)
-    parser.add_argument('--wandb_prj_name', type=str, default="CSBSR_test")
+    parser.add_argument('--wandb_prj_name', type=str, default='CSBSR_test')
     args = parser.parse_args()
 
-    if bool(re.search(r"[^0-9]", args.iter_or_weight_name)):
+    if bool(re.search(r'[^0-9]', args.iter_or_weight_name)):
         # not iteration number
         _out_dir = args.iter_or_weight_name
         model_fname = args.iter_or_weight_name
     else:
         # iteration number
-        _out_dir = f"iter_{args.iter_or_weight_name}"
-        model_fname = f"iteration_{args.iter_or_weight_name}"
+        _out_dir = f'iter_{args.iter_or_weight_name}'
+        model_fname = f'iteration_{args.iter_or_weight_name}'
 
     if not args.config_file:
         args.config_file = args.test_dir / 'config.yaml'
